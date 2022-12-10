@@ -1,7 +1,11 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <br>
+    <button @click="onPressBtn">ボタン</button>
+    <!-- <p>{{ result }}</p> -->
+    <div id="displayArea"></div>
+    <HelloWorld msg="Welcome to Your Vue.js App" />
   </div>
 </template>
 
@@ -12,7 +16,31 @@ export default {
   name: 'App',
   components: {
     HelloWorld
-  }
+  },
+  async created() {
+    await this.$axios.get('/message').then((res) => {
+      console.log(res.data)
+    })
+  },
+  data() {
+    return {
+      result: "aa"
+    }
+  },
+  methods: {
+    onPressBtn() {
+      this.$axios.get('/getData').then((res) => {
+        //this.result = res.data;
+        const data = res.data;
+        const displayArea = document.getElementById('displayArea');
+        for (let i = 0; i < data.length; i++) {
+          const para = document.createElement('p');
+          para.innerText = `${data[i].start}, ${data[i].end}`;
+          displayArea.appendChild(para);
+        }
+      })
+    }
+  },
 }
 </script>
 
