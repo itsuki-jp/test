@@ -34,7 +34,7 @@ export default {
         const displayArea = document.getElementById('displayArea');
         for (let i = 0; i < data.length; i++) {
           const para = document.createElement('p');
-          para.innerText = `${data[i].start}, ${data[i].end}`;
+          para.innerText = `${data[i].start.day}, ${data[i].end.day}`;
           displayArea.appendChild(para);
         }
       })

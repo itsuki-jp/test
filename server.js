@@ -98,14 +98,34 @@ async function listEvents(auth) {
     return isBooked;
 }
 
+function returnStartEnd(startO, endO) {
+    return {
+        start: {
+            year: startO.getFullYear(),
+            month: startO.getMonth() + 1,
+            day: startO.getDate(),
+            hr: startO.getHours(),
+            min: startO.getMinutes(),
+
+        },
+        end: {
+            year: endO.getFullYear(),
+            month: endO.getMonth() + 1,
+            day: endO.getDate(),
+            hr: endO.getHours(),
+            min: endO.getMinutes(),
+        }
+    }
+}
+
 function getFreeTime(data, minTime, maxTime) {
     const res = [];
     let now = minTime;
     for (let i = 0; i < data.length; i++) {
-        res.push({ start: now, end: data[i].start });
-        now = data[i].end;
+        res.push(returnStartEnd(now, data[i].endDateObj));
+        now = data[i].endDateObj;
     }
-    if (data[data.length - 1].endDateObj < maxTime) { res.push({ start: now, end: maxTime }) }
+    if (data[data.length - 1].endDateObj < maxTime) { res.push(returnStartEnd(now, maxTime)) }
     return res;
 }
 // ---------------------------------------------
