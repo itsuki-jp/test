@@ -74,31 +74,40 @@ async function listEvents(auth) {
     const maxResults = 100;
     const res = await calendar.events.list({
         calendarId: 'primary',
-        timeMin: new Date().toISOString(),
         maxResults: maxResults,
         singleEvents: true,
         orderBy: 'startTime',
+
+        // Todo:引数をいい感じに設定できるようにする
+        timeMin: new Date(2022, 11, 12).toISOString(),
+        timeMax: new Date(2022, 11, 15).toISOString(),
+        timeZone: "Asia/Tokyo",
     });
     const events = res.data.items;
     if (!events || events.length === 0) {
         console.log('No upcoming events found.');
         return;
     }
-    console.log('Upcoming 100 events:');
-    // events.map((event) => {
-    //     const start = event.start.dateTime || event.start.date;
-    //     console.log(`${start} - ${event.summary}`);
-    // });
-
-    const val = [];
+    const isBooked = [];
     events.map((event) => {
+        if (!event.end.dateTime) { return; }
         const start = event.start.dateTime || event.start.date;
         const end = event.end.dateTime || event.end.date;
-        val.push({ start: start, end: end });
+        isBooked.push({ start: start, end: end, startDateObj: new Date(start), endDateObj: new Date(end) });
     });
-    return val;
+    return isBooked;
 }
 
+function getFreeTime(data, minTime, maxTime) {
+    const res = [];
+    let now = minTime;
+    for (let i = 0; i < data.length; i++) {
+        res.push({ start: now, end: data[i].start });
+        now = data[i].end;
+    }
+    if (data[data.length - 1].endDateObj < maxTime) { res.push({ start: now, end: maxTime }) }
+    return res;
+}
 // ---------------------------------------------
 
 const express = require('express')
@@ -113,20 +122,18 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.use(serveStatic(__dirname + '/dist'))
 
-// 下記内容を追記
 app.get('/api/message', (req, res) => {
     res.send('get message')
 })
 
 app.get('/api/getData', (req, res) => {
-    // const time = new Date();
-    // res.send(`${time.getSeconds()}`)
-
     authorize()
         .then(listEvents)
-        .then(data => { res.send(data) })
+        .then(data => {
+            const result = getFreeTime(data, new Date(2022, 11, 12), new Date(2022, 11, 15));
+            res.send(result);
+        })
         .catch(console.error);
-    console.log("print arr");
 
 })
 

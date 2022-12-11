@@ -30,7 +30,6 @@ export default {
   methods: {
     onPressBtn() {
       this.$axios.get('/getData').then((res) => {
-        //this.result = res.data;
         const data = res.data;
         const displayArea = document.getElementById('displayArea');
         for (let i = 0; i < data.length; i++) {
